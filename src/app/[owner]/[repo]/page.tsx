@@ -1002,8 +1002,9 @@ IMPORTANT:
 
         console.log(`Starting generation for ${pages.length} pages with controlled concurrency`);
 
-        // Maximum concurrent requests
-        const MAX_CONCURRENT = 1;
+        // Maximum concurrent requests from env or default to 1
+        const envValue = parseInt(process.env.NEXT_PUBLIC_MAX_CONCURRENT || '1', 10);
+        const MAX_CONCURRENT = Number.isNaN(envValue) ? 1 : envValue;
 
         // Create a queue of pages
         const queue = [...pages];
