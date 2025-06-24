@@ -1005,6 +1005,10 @@ IMPORTANT:
         // Maximum concurrent requests from env or default to 1
         const envValue = parseInt(process.env.NEXT_PUBLIC_MAX_CONCURRENT || '1', 10);
         const MAX_CONCURRENT = Number.isNaN(envValue) ? 1 : envValue;
+        console.log(
+          `MAX_CONCURRENT set to ${MAX_CONCURRENT} ` +
+            `(env: ${process.env.NEXT_PUBLIC_MAX_CONCURRENT ?? 'undefined'})`
+        );
 
         // Create a queue of pages
         const queue = [...pages];
