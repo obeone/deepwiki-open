@@ -101,6 +101,13 @@ npm run dev
 yarn dev
 ```
 
+#### Optional: Start the Flask Frontend
+
+```bash
+export DEEPWIKI_API_URL=http://localhost:8001
+python -m flask_frontend.app
+```
+
 #### Step 4: Use DeepWiki!
 
 1. Open [http://localhost:3000](http://localhost:3000) in your browser

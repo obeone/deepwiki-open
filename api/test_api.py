@@ -1,6 +1,9 @@
 import requests
 import json
 import sys
+import pytest
+
+pytest.skip("requires external parameters", allow_module_level=True)
 
 def test_streaming_endpoint(repo_url, query, file_path=None):
     """
