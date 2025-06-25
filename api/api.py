@@ -57,6 +57,21 @@ class ProcessedProjectEntry(BaseModel):
     submittedAt: int # Timestamp
     language: str # Extracted from filename
 
+class ProcessedProjectRequest(BaseModel):
+    '''
+    Request model for registering a processed project.
+
+    Attributes:
+        repo_url (str): Repository URL.
+        repo_type (str): Repository type, e.g., github.
+        token (Optional[str]): Access token for private repositories.
+        language (Optional[str]): Language for wiki content.
+    '''
+    repo_url: str
+    repo_type: str = "github"
+    token: Optional[str] = None
+    language: Optional[str] = None
+
 class RepoInfo(BaseModel):
     owner: str
     repo: str
@@ -620,3 +635,49 @@ async def get_processed_projects():
     except Exception as e:
         logger.error(f"Error listing processed projects from {WIKI_CACHE_DIR}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to list processed projects from server cache.")
+
+
+@app.post("/api/processed_projects", status_code=201)
+async def create_processed_project(request: ProcessedProjectRequest):
+    '''
+    Register a new processed project by creating an empty cache entry.
+
+    Args:
+        request (ProcessedProjectRequest): Project information.
+
+    Returns:
+        dict: Confirmation message.
+    '''
+    language = request.language or configs["lang_config"]["default"]
+    if language not in configs["lang_config"]["supported_languages"]:
+        language = configs["lang_config"]["default"]
+
+    parts = request.repo_url.rstrip("/").split("/")
+    if len(parts) < 5:
+        raise HTTPException(status_code=400, detail="Invalid repository URL")
+
+    owner = parts[-2]
+    repo = parts[-1].replace(".git", "")
+
+    filename = f"deepwiki_cache_{request.repo_type}_{owner}_{repo}_{language}.json"
+    os.makedirs(WIKI_CACHE_DIR, exist_ok=True)
+    file_path = os.path.join(WIKI_CACHE_DIR, filename)
+
+    cache_data = {
+        "repo": {
+            "owner": owner,
+            "repo": repo,
+            "type": request.repo_type,
+            "token": request.token,
+            "repo_url": request.repo_url,
+        },
+        "wiki_structure": {},
+        "generated_pages": {},
+        "provider": "unknown",
+        "model": "unknown",
+    }
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(cache_data, f, indent=2)
+
+    return {"message": "Project registered"}

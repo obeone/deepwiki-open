@@ -105,6 +105,7 @@ yarn dev
 
 ```bash
 export DEEPWIKI_API_URL=http://localhost:8001
+export DEEPWIKI_FRONTEND_PORT=5000 # Optional custom port
 python -m flask_frontend.app
 ```
 

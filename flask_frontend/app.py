@@ -22,10 +22,16 @@ def index():
         params = {
             'repo_url': repo_url,
             'token': token,
-            'type': repo_type,
+            'repo_type': repo_type,
         }
-        # Placeholder: call backend to process repository (not implemented)
-        # Redirect to projects list after submission
+        try:
+            requests.post(
+                f"{API_URL}/api/processed_projects",
+                json=params,
+                timeout=10,
+            )
+        except Exception:
+            pass
         return redirect(url_for('projects'))
     return render_template('index.html')
 
