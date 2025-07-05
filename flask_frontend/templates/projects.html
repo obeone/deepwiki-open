@@ -8,7 +8,11 @@
     <h1>Processed Projects</h1>
     <ul>
       {% for project in projects %}
-        <li>{{ project.name }} ({{ project.repo_type }})</li>
+        <li>
+          <a href="{{ url_for('project_detail', repo_type=project.repo_type, owner=project.owner, repo=project.repo, language=project.language) }}">
+            {{ project.name }} ({{ project.repo_type }})
+          </a>
+        </li>
       {% else %}
         <li>No projects available.</li>
       {% endfor %}

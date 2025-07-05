@@ -108,6 +108,8 @@ export DEEPWIKI_API_URL=http://localhost:8001
 export DEEPWIKI_FRONTEND_PORT=5000 # Optional custom port
 python -m flask_frontend.app
 ```
+The Flask interface lets you submit repositories, view processed projects, and
+inspect generated pages for each project.
 
 #### Step 4: Use DeepWiki!
 
