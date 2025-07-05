@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Project Details</title>
+  </head>
+  <body>
+    <h1>Project Details</h1>
+    {% if project %}
+      <h2>{{ project.repo.owner }}/{{ project.repo.repo }}</h2>
+      <p>Repository Type: {{ project.repo.type }}</p>
+      <p>Language: {{ project.repo_type }}</p>
+      <h3>Pages</h3>
+      <ul>
+        {% for page_id, page in project.generated_pages.items() %}
+          <li>{{ page.title }}</li>
+        {% else %}
+          <li>No pages generated yet.</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Project not found.</p>
+    {% endif %}
+    <p><a href="{{ url_for('projects') }}">Back to projects</a></p>
+  </body>
+</html>

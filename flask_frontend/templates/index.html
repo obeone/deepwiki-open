@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>DeepWiki Flask</title>
+  </head>
+  <body>
+    <h1>DeepWiki Flask Frontend</h1>
+    <form method="post">
+      <label for="repo_url">Repository URL:</label>
+      <input type="text" id="repo_url" name="repo_url" required>
+      <br>
+      <label for="repo_type">Repository Type:</label>
+      <select id="repo_type" name="repo_type">
+        <option value="github">GitHub</option>
+        <option value="gitlab">GitLab</option>
+        <option value="bitbucket">Bitbucket</option>
+      </select>
+      <br>
+      <label for="token">Access Token (optional):</label>
+      <input type="text" id="token" name="token">
+      <br>
+      <button type="submit">Submit</button>
+    </form>
+    <p><a href="{{ url_for('projects') }}">View Processed Projects</a></p>
+  </body>
+</html>
