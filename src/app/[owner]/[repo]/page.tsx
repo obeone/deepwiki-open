@@ -216,6 +216,10 @@ export default function RepoWikiPage() {
   const [effectiveRepoInfo, setEffectiveRepoInfo] = useState(repoInfo); // Track effective repo info with cached data
   const [embeddingError, setEmbeddingError] = useState(false);
 
+  // Track current active generation count and limit
+  const [currentConcurrency, setCurrentConcurrency] = useState(0);
+  const [maxConcurrency, setMaxConcurrency] = useState(1);
+
   // Model selection state variables
   const [selectedProviderState, setSelectedProviderState] = useState(providerParam);
   const [selectedModelState, setSelectedModelState] = useState(modelParam);
@@ -1039,8 +1043,14 @@ IMPORTANT:
 
         console.log(`Starting generation for ${pages.length} pages with controlled concurrency`);
 
-        // Maximum concurrent requests
-        const MAX_CONCURRENT = 1;
+        // Maximum concurrent requests from env or default to 1
+        const envValue = parseInt(process.env.NEXT_PUBLIC_MAX_CONCURRENT || '1', 10);
+        const MAX_CONCURRENT = Number.isNaN(envValue) ? 1 : envValue;
+        setMaxConcurrency(MAX_CONCURRENT);
+        console.log(
+          `MAX_CONCURRENT set to ${MAX_CONCURRENT} ` +
+            `(env: ${process.env.NEXT_PUBLIC_MAX_CONCURRENT ?? 'undefined'})`
+        );
 
         // Create a queue of pages
         const queue = [...pages];
@@ -1053,6 +1063,7 @@ IMPORTANT:
             const page = queue.shift();
             if (page) {
               activeRequests++;
+              setCurrentConcurrency(activeRequests);
               console.log(`Starting page ${page.title} (${activeRequests} active, ${queue.length} remaining)`);
 
               // Start generating content for this page
@@ -1060,11 +1071,13 @@ IMPORTANT:
                 .finally(() => {
                   // When done (success or error), decrement active count and process more
                   activeRequests--;
+                  setCurrentConcurrency(activeRequests);
                   console.log(`Finished page ${page.title} (${activeRequests} active, ${queue.length} remaining)`);
 
                   // Check if all work is done (queue empty and no active requests)
                   if (queue.length === 0 && activeRequests === 0) {
                     console.log("All page generation tasks completed.");
+                    setCurrentConcurrency(0);
                     setIsLoading(false);
                     setLoadingMessage(undefined);
                   } else {
@@ -1082,10 +1095,12 @@ IMPORTANT:
             // This handles the case where the queue might finish before the finally blocks fully update activeRequests
             // or if the initial queue was processed very quickly
             console.log("Queue empty and no active requests after loop, ensuring loading is false.");
+            setCurrentConcurrency(0);
             setIsLoading(false);
             setLoadingMessage(undefined);
           } else if (pages.length === 0) {
             // Handle case where there were no pages to begin with
+            setCurrentConcurrency(0);
             setIsLoading(false);
             setLoadingMessage(undefined);
           }
@@ -1934,6 +1949,9 @@ IMPORTANT:
                             .replace('{completed}', (wikiStructure.pages.length - pagesInProgress.size).toString())
                             .replace('{total}', wikiStructure.pages.length.toString())
                         : `${wikiStructure.pages.length - pagesInProgress.size} of ${wikiStructure.pages.length} pages completed`}
+                </p>
+                <p className="text-xs text-[var(--muted)] text-center mt-1">
+                  {`Active generation: ${currentConcurrency} / ${maxConcurrency}`}
                 </p>
 
                 {/* Show list of in-progress pages */}
